@@ -214,6 +214,7 @@ struct Test {
             // Compile just the vector Func to assembly.
             string asm_filename = output_directory + "check_" + name + ".s";
             f.compile_to_assembly(asm_filename, arg_types, target);
+            f.compile_to_bitcode(asm_filename+".bc", arg_types, target);
 
             std::ifstream asm_file;
             asm_file.open(asm_filename);
@@ -241,6 +242,7 @@ struct Test {
         // Also compile the error checking Func (to be sure it compiles without error)
         string fn_name = "test_" + name;
         error.compile_to_file(output_directory + fn_name, arg_types, fn_name, target);
+        f_scalar.compile_to_bitcode(output_directory + fn_name + ".bc", arg_types, fn_name, target);
 
         bool can_run_the_code = can_run_code();
         if (can_run_the_code) {
@@ -428,9 +430,12 @@ struct Test {
             check("psubq", w, i64_1 - i64_2);
             check(use_avx512_skylake ? "vpmullq" : "pmuludq", w, u64_1 * u64_2);
 
-            check("packssdw", 4*w, i16_sat(i32_1));
-            check("packsswb", 8*w, i8_sat(i16_1));
-            check("packuswb", 8*w, u8_sat(i16_1));
+            const char *check_suffix = "";
+            if (w > 3)
+                check_suffix = "*ymm";
+            check(std::string("packssdw") + check_suffix, 4*w, i16_sat(i32_1));
+            check(std::string("packsswb") + check_suffix, 8*w, i8_sat(i16_1));
+            check(std::string("packuswb") + check_suffix, 8*w, u8_sat(i16_1));
         }
 
         // SSE 3
@@ -562,7 +567,7 @@ struct Test {
         if (use_avx2) {
             check("vpaddb*ymm", 32, u8_1 + u8_2);
             check("vpsubb*ymm", 32, u8_1 - u8_2);
-            check("vpaddsb", 32, i8_sat(i16(i8_1) + i16(i8_2)));
+            check("vpaddsb*ymm", 32, i8_sat(i16(i8_1) + i16(i8_2)));
             check("vpsubsb", 32, i8_sat(i16(i8_1) - i16(i8_2)));
             check("vpaddusb", 32, u8(min(u16(u8_1) + u16(u8_2), max_u8)));
             check("vpsubusb", 32, u8(max(i16(u8_1) - i16(u8_2), 0)));
@@ -597,10 +602,6 @@ struct Test {
             check("vpaddq*ymm", 8, i64_1 + i64_2);
             check("vpsubq*ymm", 8, i64_1 - i64_2);
             check(use_avx512_skylake ? "vpmullq" : "vpmuludq", 8, u64_1 * u64_2);
-
-            check("vpackssdw", 16, i16_sat(i32_1));
-            check("vpacksswb", 32, i8_sat(i16_1));
-            check("vpackuswb", 32, u8_sat(i16_1));
 
             check("vpabsb", 32, abs(i8_1));
             check("vpabsw", 16, abs(i16_1));
