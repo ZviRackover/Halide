@@ -1131,6 +1131,10 @@ void CodeGen_LLVM::visit(const StringImm *op) {
     value = create_string_constant(op->value);
 }
 
+void CodeGen_LLVM::visit(const Undef *op) {
+    value = UndefValue::get(llvm_type_of(op->type));
+}
+
 void CodeGen_LLVM::visit(const Cast *op) {
     Halide::Type src = op->value.type();
     Halide::Type dst = op->type;
@@ -2176,9 +2180,32 @@ void CodeGen_LLVM::visit(const Call *op) {
             codegen(Call::make(op->type, name, op->args, Call::Extern));
         } else {
             // Generate select(x >= 0, x, -x) instead
-            string x_name = unique_name('x');
-            Expr x = Variable::make(op->args[0].type(), x_name);
-            value = codegen(Let::make(x_name, op->args[0], select(x >= 0, x, -x)));
+            if (t.is_vector()) {
+                int slice_size = target.natural_vector_size(t);
+                vector<Expr> result;
+                Expr arg = op->args[0];
+                if (t.lanes() % slice_size) {
+                    Expr undefs = Broadcast::make(Undef::make(t.element_of()), t.lanes());
+                    std::vector<int> indices;
+                    for (int j = 0; j < (t.lanes() / slice_size + 1) * slice_size; ++j)
+                        indices.push_back(j);
+                    arg = Shuffle::make({ arg, undefs }, indices);
+                }
+                for (int i = 0, n = arg.type().lanes(); i < n; i += slice_size) {
+                    Expr sa = Shuffle::make_slice(arg, i * slice_size, 1, slice_size);
+                    string x_name = unique_name('x');
+                    Expr x = Variable::make(sa.type(), x_name);
+                    Expr slice_value = Let::make(x_name, sa, select(x >= 0, x, -x));
+                    result.push_back(slice_value);
+                }
+                Expr res = Shuffle::make_concat(result);
+                res = Shuffle::make_slice(res, 0, 1, t.lanes());
+                value = codegen(res);
+            } else {
+                string x_name = unique_name('x');
+                Expr x = Variable::make(op->args[0].type(), x_name);
+                value = codegen(Let::make(x_name, op->args[0], select(x >= 0, x, -x)));
+            }
         }
     } else if (op->is_intrinsic(Call::absd)) {
 

@@ -50,24 +50,3 @@ define weak_odr <2 x double> @trunc_f64x2(<2 x double> %x) nounwind uwtable read
   %1 = tail call <2 x double> @llvm.x86.sse41.round.pd(<2 x double> %x, i32 3)
   ret <2 x double> %1
 }
-
-define weak_odr <16 x i8> @abs_i8x16(<16 x i8> %x) nounwind uwtable readnone alwaysinline {
-  %1 = sub <16 x i8> zeroinitializer, %x
-  %2 = icmp sgt <16 x i8> %x, zeroinitializer
-  %3 = select <16 x i1> %2, <16 x i8> %x, <16 x i8> %1
-  ret <16 x i8> %3
-}
-
-define weak_odr <8 x i16> @abs_i16x8(<8 x i16> %x) nounwind uwtable readnone alwaysinline {
-  %1 = sub <8 x i16> zeroinitializer, %x
-  %2 = icmp sgt <8 x i16> %x, zeroinitializer
-  %3 = select <8 x i1> %2, <8 x i16> %x, <8 x i16> %1
-  ret <8 x i16> %3
-}
-
-define weak_odr <4 x i32> @abs_i32x4(<4 x i32> %x) nounwind uwtable readnone alwaysinline {
-  %1 = sub <4 x i32> zeroinitializer, %x
-  %2 = icmp sgt <4 x i32> %x, zeroinitializer
-  %3 = select <4 x i1> %2, <4 x i32> %x, <4 x i32> %1
-  ret <4 x i32> %3
-}

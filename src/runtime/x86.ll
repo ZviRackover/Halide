@@ -67,23 +67,6 @@ define weak_odr <2 x double> @sqrt_f64x2(<2 x double> %x) nounwind uwtable readn
 }
 
 declare <4 x float> @llvm.x86.sse.sqrt.ps(<4 x float>) nounwind readnone
-
-define weak_odr <4 x float> @abs_f32x4(<4 x float> %x) nounwind uwtable readnone alwaysinline {
-  %arg = bitcast <4 x float> %x to <4 x i32>
-  %mask = lshr <4 x i32> <i32 -1, i32 -1, i32 -1, i32 -1>, <i32 1, i32 1, i32 1, i32 1>
-  %masked = and <4 x i32> %arg, %mask
-  %result = bitcast <4 x i32> %masked to <4 x float>
-  ret <4 x float> %result
-}
-
-define weak_odr <2 x double> @abs_f64x2(<2 x double> %x) nounwind uwtable readnone alwaysinline {
-  %arg = bitcast <2 x double> %x to <2 x i64>
-  %mask = lshr <2 x i64> <i64 -1, i64 -1>, <i64 1, i64 1>
-  %masked = and <2 x i64> %arg, %mask
-  %result = bitcast <2 x i64> %masked to <2 x double>
-  ret <2 x double> %result
-}
-
 declare <4 x float> @llvm.x86.sse.rcp.ss(<4 x float>) nounwind readnone
 define weak_odr float @fast_inverse_f32(float %x) nounwind uwtable readnone alwaysinline {
   %vec = insertelement <4 x float> undef, float %x, i32 0

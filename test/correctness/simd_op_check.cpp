@@ -214,6 +214,7 @@ struct Test {
             // Compile just the vector Func to assembly.
             string asm_filename = output_directory + "check_" + name + ".s";
             f.compile_to_assembly(asm_filename, arg_types, target);
+            f.compile_to_llvm_assembly(asm_filename + ".ll", arg_types, target);
 
             std::ifstream asm_file;
             asm_file.open(asm_filename);

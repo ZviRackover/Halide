@@ -65,6 +65,7 @@ enum class IRNodeType {
     Evaluate,
     Shuffle,
     Prefetch,
+    Undef
 };
 
 /** The abstract base classes for a node in the Halide IR. */
@@ -203,6 +204,17 @@ struct IntImm : public ExprNode<IntImm> {
     }
 
     static const IRNodeType _node_type = IRNodeType::IntImm;
+};
+
+struct Undef : public ExprNode<Undef> {
+    static const Undef *make(Type t) {
+         internal_assert(t.bits() == 8 || t.bits() == 16 || t.bits() == 32 || t.bits() == 64)
+            << "IntImm must be 8, 16, 32, or 64-bit\n";
+        Undef *node = new Undef;
+        node->type = t;
+        return node;
+    }
+    static const IRNodeType _node_type = IRNodeType::Undef;
 };
 
 /** Unsigned integer constants */

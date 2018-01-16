@@ -256,6 +256,22 @@ struct Target {
                 return 1;
             }
         } else if (arch == Target::X86) {
+            bool has_int512_8_16 = has_feature(Halide::Target::AVX512_Skylake) ||
+                                   has_feature(Halide::Target::AVX512_Cannonlake);
+            bool has_fp512 = has_feature(Halide::Target::AVX512) ||
+                             has_feature(Halide::Target::AVX512_KNL) || has_int512_8_16;
+            bool has_int256 = has_feature(Halide::Target::AVX2) || has_fp512;
+            bool has_fp256 = has_feature(Halide::Target::AVX) || has_int256;
+            if (t.is_vector()) {
+                int size_in_bits = t.lanes() * t.bits();
+                if (size_in_bits <= 128 || (is_integer && !has_int256) ||
+                    (!is_integer && !has_fp256))
+                    return 16 / data_size;
+                if (size_in_bits <= 256 || !has_fp512 ||
+                    (is_integer && t.bits() < 32 && !has_int512_8_16))
+                    return 32 / data_size;
+                return 64 / data_size;
+            }
             if (is_integer && (has_feature(Halide::Target::AVX512_Skylake) ||
                                has_feature(Halide::Target::AVX512_Cannonlake))) {
                 // AVX512BW exists on Skylake and Cannonlake
@@ -266,7 +282,7 @@ struct Target {
                                         has_feature(Halide::Target::AVX512_Cannonlake))) {
                 // AVX512F is on all AVX512 architectures
                 return 64 / data_size;
-            } else if (has_feature(Halide::Target::AVX2)) {
+            } else if (has_int256) {
                 // AVX2 uses 256-bit vectors for everything.
                 return 32 / data_size;
             } else if (!is_integer && has_feature(Halide::Target::AVX)) {

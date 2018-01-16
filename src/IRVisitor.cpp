@@ -21,6 +21,9 @@ void IRVisitor::visit(const FloatImm *) {
 void IRVisitor::visit(const StringImm *) {
 }
 
+void IRVisitor::visit(const Undef *) {
+}
+
 void IRVisitor::visit(const Cast *op) {
     op->value.accept(this);
 }

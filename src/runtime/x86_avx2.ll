@@ -52,27 +52,6 @@ define weak_odr <16 x i16>  @packusdwx16(<16 x i32> %arg) nounwind alwaysinline 
 }
 declare <16 x i16> @llvm.x86.avx2.packusdw(<8 x i32>, <8 x i32>) nounwind readnone
 
-define weak_odr <32 x i8> @abs_i8x32(<32 x i8> %arg) {
- %1 = sub <32 x i8> zeroinitializer, %arg
- %2 = icmp sgt <32 x i8> %arg, zeroinitializer
- %3 = select <32 x i1> %2, <32 x i8> %arg, <32 x i8> %1
- ret <32 x i8> %3
-}
-
-define weak_odr <16 x i16> @abs_i16x16(<16 x i16> %arg) {
- %1 = sub <16 x i16> zeroinitializer, %arg
- %2 = icmp sgt <16 x i16> %arg, zeroinitializer
- %3 = select <16 x i1> %2, <16 x i16> %arg, <16 x i16> %1
- ret <16 x i16> %3
-}
-
-define weak_odr <8 x i32> @abs_i32x8(<8 x i32> %arg) {
- %1 = sub <8 x i32> zeroinitializer, %arg
- %2 = icmp sgt <8 x i32> %arg, zeroinitializer
- %3 = select <8 x i1> %2, <8 x i32> %arg, <8 x i32> %1
- ret <8 x i32> %3
-}
-
 define weak_odr <8 x i32> @pmaddwdx8(<8 x i16> %a, <8 x i16> %b, <8 x i16> %c, <8 x i16> %d) nounwind alwaysinline {
   %1 = shufflevector <8 x i16> %a, <8 x i16> %c, <16 x i32> <i32 0, i32 8, i32 1, i32 9, i32 2, i32 10, i32 3, i32 11, i32 4, i32 12, i32 5, i32 13, i32 6, i32 14, i32 7, i32 15>
   %2 = shufflevector <8 x i16> %b, <8 x i16> %d, <16 x i32> <i32 0, i32 8, i32 1, i32 9, i32 2, i32 10, i32 3, i32 11, i32 4, i32 12, i32 5, i32 13, i32 6, i32 14, i32 7, i32 15>

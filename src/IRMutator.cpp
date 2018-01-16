@@ -71,6 +71,7 @@ pair<Region, bool> mutate_region(Mutator *mutator, const Region &bounds) {
 
 void IRMutator::visit(const IntImm *op)   {expr = op;}
 void IRMutator::visit(const UIntImm *op)   {expr = op;}
+void IRMutator::visit(const Undef *op)   {expr = op;}
 void IRMutator::visit(const FloatImm *op) {expr = op;}
 void IRMutator::visit(const StringImm *op) {expr = op;}
 void IRMutator::visit(const Variable *op) {expr = op;}
@@ -398,6 +399,7 @@ Expr IRMutator2::visit(const IntImm *op)   {return op;}
 Expr IRMutator2::visit(const UIntImm *op)   {return op;}
 Expr IRMutator2::visit(const FloatImm *op) {return op;}
 Expr IRMutator2::visit(const StringImm *op) {return op;}
+Expr IRMutator2::visit(const Undef *op) {return op;}
 Expr IRMutator2::visit(const Variable *op) {return op;}
 
 Expr IRMutator2::visit(const Cast *op) {
